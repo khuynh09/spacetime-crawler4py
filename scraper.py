@@ -1,6 +1,7 @@
 import re
 from urllib.parse import urlparse
 from lxml.html.soupparser import fromstring
+from lxml.etree import tostring
 
 ics_urls = [".ics.uci.edu", ".cs.uci.edu", ".informatics.uci.edu", ".stat.uci.edu", "today.uci.edu/department/information_computer_sciences/"]
 
@@ -12,20 +13,34 @@ def scraper(url, resp):
 def extract_next_links(url, resp):
     # Implementation required.
 
+    result = []
     ##TODO: checking HTML
+    html = resp.raw_response.content
+    root = fromstring(html)
+    html_string = tostring(root).strip().decode("utf-8") 
 
-    return list()
+
+    hrefs = re.findall(r'href=".+" ', html_string)
+
+    for href in hrefs:
+        # print(h.split()[0])
+        # parsed = urlparse(h.split()[0].strip("href=").strip('"'))
+        result.append(href.split()[0].strip("href=").strip('"'))
+
+
+    return result
 
 def is_valid(url):
+    
+
     try:
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
             return False
 
         is_ics_url = False
-        for url in ics_urls:
-            if parsed.path.lower().contains(url):
-                is_ics_url = True
+
+        is_ics_url =  any(url in parsed.geturl() for url in ics_urls)
 
         if not is_ics_url:
             return False 
