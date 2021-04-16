@@ -26,8 +26,10 @@ def extract_next_links(url, resp):
             hrefs = re.findall(r'href=".+" ', html_string)
 
             for href in hrefs:
+                
                 # print(h.split()[0])
-                # parsed = urlparse(h.split()[0].strip("href=").strip('"'))
+                # parsed = urlparse(href.split()[0].strip("href=").strip('"'))
+                # print(parsed)
                 result.append(href.split()[0].strip("href=").strip('"'))
 
     except Exception as e:
@@ -74,11 +76,12 @@ def is_valid(url):
         if not is_ics_url:
             return False 
 
-        # if re.match(r".*respond.*|.*reply.*|.*comment.*",parsed.query) or re.match(r".*pdf.*|.*respond.*|.*reply.*|.*comment.*",url):
-        #     return False
+        if re.match(
+            r".*(respond|reply|comment|calender|css|js|spdf|gif|jpe?g|ico|pdf).*", url):
+                return False
 
         return not re.match(
-            r".*\.(respond|reply|comment|css|js|bmp|gif|jpe?g|ico"
+            r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
             + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf"
             + r"|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names"

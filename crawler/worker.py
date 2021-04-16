@@ -11,9 +11,11 @@ class Worker(Thread):
         self.logger = get_logger(f"Worker-{worker_id}", "Worker")
         self.config = config
         self.frontier = frontier
+        self.saved_urls = []
         super().__init__(daemon=True)
         
     def run(self):
+
         while True:
             tbd_url = self.frontier.get_tbd_url()
             if not tbd_url:
@@ -25,8 +27,12 @@ class Worker(Thread):
                 f"using cache {self.config.cache_server}.")
             
             scraped_urls = scraper(tbd_url, resp)
+            # print(self.saved_urls)
             for scraped_url in scraped_urls:
-
-                self.frontier.add_url(scraped_url)
+                
+                if scraped_url not in self.saved_urls:
+                    self.frontier.add_url(scraped_url)
+                    self.saved_urls.append(scraped_url)
+                    
             self.frontier.mark_url_complete(tbd_url)
             time.sleep(self.config.time_delay)
