@@ -12,7 +12,7 @@ ics_urls = [".ics.uci.edu", ".cs.uci.edu", ".informatics.uci.edu",
 def scraper(url, resp):
 
     links = extract_next_links(url, resp)
-    return [link for link in links if is_valid(link)]
+    return [urldefrag(link)[0] for link in links if is_valid(link)]
 
 
 def extract_next_links(url, resp):
@@ -20,8 +20,8 @@ def extract_next_links(url, resp):
 
     result = []
     try:
-
-        if resp.raw_response:
+        #print(resp.status)
+        if  resp.raw_response:
             html = resp.raw_response.content
             root = fromstring(html)
             html_string = tostring(root).strip().decode("utf-8")
@@ -33,6 +33,7 @@ def extract_next_links(url, resp):
                 # print(h.split()[0])
                 # parsed = urlparse(href.split()[0].strip("href=").strip('"'))
                 # print(parsed)
+                
                 result.append(href.split()[0].strip("href=").strip('"'))
 
     except Exception as e:
@@ -40,6 +41,7 @@ def extract_next_links(url, resp):
         print()
 
         try:
+            print(resp.status)
             if resp.raw_response:
                 html = resp.raw_response.content
                 root = etree.fromstring(html)
@@ -50,7 +52,7 @@ def extract_next_links(url, resp):
                 for href in hrefs:
                     # print(h.split()[0])
                     # parsed = urlparse(h.split()[0].strip("href=").strip('"'))
-                    result.append(href.split()[0].strip("href=").strip('"'))
+                    result.append( href.split()[0].strip("href=").strip('"'))
 
         except Exception as e:
             print(e)
@@ -63,7 +65,8 @@ def extract_next_links(url, resp):
 def is_valid(url):
 
     try:
-        parsedURL = urldefrag(url)[0]
+        defragged_url = urldefrag(url)[0]
+        parsedURL = urlparse(defragged_url)
 
         if parsedURL.scheme not in set(["http", "https"]):
             return False
@@ -78,7 +81,7 @@ def is_valid(url):
             return False
 
         if re.match(
-                r".*(respond|reply|comment|calender|css|js|spdf|gif|jpe?g|ico|pdf).*", parsedURL):
+                r".*(respond|reply|comment|calender|\/css\/|\/js\/|\/pdf\/|\/gif\/|\/jpe?g\/|\/ico\/).*", defragged_url):
             return False
 
         return not re.match(
@@ -89,7 +92,7 @@ def is_valid(url):
             + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
             + r"|epub|dll|cnf|tgz|sha1"
             + r"|thmx|mso|arff|rtf|jar|csv"
-            + r"|rm|smil|wmv|swf|wma|zip|rar|gz).*", parsedURL)
+            + r"|rm|smil|wmv|swf|wma|zip|rar|gz).*", defragged_url)
 
     except TypeError:
         print("TypeError for ", parsedURL)
