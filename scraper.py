@@ -5,6 +5,7 @@ from lxml.html.soupparser import fromstring
 from lxml.etree import tostring
 from lxml import etree
 
+
 ics_urls = [".ics.uci.edu", ".cs.uci.edu", ".informatics.uci.edu",
             ".stat.uci.edu", "today.uci.edu/department/information_computer_sciences/"]
 

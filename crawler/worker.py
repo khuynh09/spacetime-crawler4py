@@ -4,6 +4,11 @@ from utils.download import download
 from utils import get_logger
 from scraper import scraper
 import time
+from bs4 import BeautifulSoup
+from utils import tokenizer
+
+# .ics.uci.edu
+# 
 
 
 class Worker(Thread):
@@ -12,8 +17,20 @@ class Worker(Thread):
         self.config = config
         self.frontier = frontier
         self.saved_urls = []
+        self.word_freq = {}
+        self.longest_page = [] # [page url, wordCount]
+        self.subdomains = {}
         super().__init__(daemon=True)
-        
+
+
+    # def tokenize(content):
+    #     for line in openedFile:
+    #             tokens = re.sub(r'[^\w\s]|_', '', line).rstrip(
+    #                 '\r\n').rstrip().split(" ")
+    #             i = 0
+    #             while i < len(tokens):
+    #                 tokens[i] = tokens[i].lower()
+    #                 i += 1
     def run(self):
 
         while True:
@@ -23,7 +40,9 @@ class Worker(Thread):
                 break
             resp = download(tbd_url, self.config, self.logger)
 
-            if resp.status == 200 and resp.raw_response:
+            if 200 <= resp.status < 300 and resp.raw_response:
+                soup  = BeautifulSoup(resp.raw_response.content, features="lxml")
+                print(soup.get_text(separator=" "))
                 self.logger.info(
                     f"Downloaded {tbd_url}, status <{resp.status}>, "
                     f"using cache {self.config.cache_server}.")
@@ -34,8 +53,11 @@ class Worker(Thread):
                 for scraped_url in scraped_urls:
                     
                     if scraped_url not in self.saved_urls:
+                        
                         self.frontier.add_url(scraped_url)
                         self.saved_urls.append(scraped_url)
+
+                        
                         
                 self.frontier.mark_url_complete(tbd_url)
                 time.sleep(self.config.time_delay)
