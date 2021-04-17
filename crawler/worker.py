@@ -23,7 +23,7 @@ class Worker(Thread):
                 break
             resp = download(tbd_url, self.config, self.logger)
 
-            if resp.status == 200 and resp.raw_response:
+            if 200 <= resp.status < 300 and resp.raw_response:
                 self.logger.info(
                     f"Downloaded {tbd_url}, status <{resp.status}>, "
                     f"using cache {self.config.cache_server}.")
