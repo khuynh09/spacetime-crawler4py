@@ -65,7 +65,7 @@ def is_valid(url):
     try:
         parsedURL = urldefrag(url)[0]
 
-        if parsed.scheme not in set(["http", "https"]):
+        if parsedURL.scheme not in set(["http", "https"]):
             return False
 
         is_ics_url = False
