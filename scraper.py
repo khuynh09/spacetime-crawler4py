@@ -2,7 +2,6 @@ import re
 from urllib.parse import urlparse
 from urllib.parse import urldefrag
 from lxml.html.soupparser import fromstring
-from lxml.etree import tostring
 from lxml import etree
 
 
@@ -25,7 +24,7 @@ def extract_next_links(url, resp):
         if  resp.raw_response:
             html = resp.raw_response.content
             root = fromstring(html)
-            html_string = tostring(root).strip().decode("utf-8")
+            html_string = etree.tostring(root).strip().decode("utf-8")
 
             hrefs = re.findall(r'href=".+" ', html_string)
 

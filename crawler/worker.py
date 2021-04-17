@@ -97,5 +97,12 @@ class Worker(Thread):
                 self.frontier.mark_url_complete(tbd_url)
                 time.sleep(self.config.time_delay)
 
-            print(sorted(self.word_freq.items(), key=lambda x: x[1], reverse=True)[0:10])
+        sortedWords = sorted(self.word_freq.items(), key=lambda x: x[1], reverse=True)
+        top50 = []
+        i = 0
+        while len(top50) < 50:
+            if sortedWords[i] not in self.stop_words:
+                top50.append(sortedWords[i])
+        print(top50)
+
         
