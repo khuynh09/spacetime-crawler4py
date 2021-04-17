@@ -82,7 +82,7 @@ def is_valid(url):
             return False
 
         if re.match(
-                r".*(respond|reply|comment|calender|\/css\/|\/js\/|\/pdf\/|\/gif\/|\/jpe?g\/|\/ico\/).*", defragged_url):
+                r".*(\/events?\/|responds?|reply|replies|comments?|calenders?|\/css\/|\/js\/|\/pdf\/|\/gif\/|\/jpe?g\/|\/ico\/).*", defragged_url):
             return False
 
         return not re.match(
