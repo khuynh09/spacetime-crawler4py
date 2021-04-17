@@ -1,15 +1,19 @@
 import re
 from urllib.parse import urlparse
+from urllib.parse import urldefrag
 from lxml.html.soupparser import fromstring
 from lxml.etree import tostring
 from lxml import etree
 
-ics_urls = [".ics.uci.edu", ".cs.uci.edu", ".informatics.uci.edu", ".stat.uci.edu", "today.uci.edu/department/information_computer_sciences/"]
+ics_urls = [".ics.uci.edu", ".cs.uci.edu", ".informatics.uci.edu",
+            ".stat.uci.edu", "today.uci.edu/department/information_computer_sciences/"]
+
 
 def scraper(url, resp):
 
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
+
 
 def extract_next_links(url, resp):
     # Implementation required.
@@ -20,13 +24,12 @@ def extract_next_links(url, resp):
         if resp.raw_response:
             html = resp.raw_response.content
             root = fromstring(html)
-            html_string = tostring(root).strip().decode("utf-8") 
-
+            html_string = tostring(root).strip().decode("utf-8")
 
             hrefs = re.findall(r'href=".+" ', html_string)
 
             for href in hrefs:
-                
+
                 # print(h.split()[0])
                 # parsed = urlparse(href.split()[0].strip("href=").strip('"'))
                 # print(parsed)
@@ -36,12 +39,11 @@ def extract_next_links(url, resp):
         print(e)
         print()
 
-        try: 
+        try:
             if resp.raw_response:
                 html = resp.raw_response.content
                 root = etree.fromstring(html)
-                html_string = etree.tostring(root).strip().decode("utf-8") 
-
+                html_string = etree.tostring(root).strip().decode("utf-8")
 
                 hrefs = re.findall(r'href=".+" ', html_string)
 
@@ -54,31 +56,30 @@ def extract_next_links(url, resp):
             print(e)
             if "Opening and ending tag mismatch" in str(e):
                 return []
-            
-
 
     return result
 
+
 def is_valid(url):
-    
 
     try:
-        parsed = urlparse(url)
+        parsedURL = urldefrag(url)[0]
 
         if parsed.scheme not in set(["http", "https"]):
             return False
 
         is_ics_url = False
 
-        correct_ics_url = parsed.scheme + parsed.netloc + parsed.path
-        is_ics_url =  any(url in correct_ics_url for url in ics_urls)
+        correct_ics_url = parsedURL.scheme + parsedURL.netloc + parsedURL.path
+        is_ics_url = any(
+            parsedURL in correct_ics_url for parsedURL in ics_urls)
 
         if not is_ics_url:
-            return False 
+            return False
 
         if re.match(
-            r".*(respond|reply|comment|calender|css|js|spdf|gif|jpe?g|ico|pdf).*", url):
-                return False
+                r".*(respond|reply|comment|calender|css|js|spdf|gif|jpe?g|ico|pdf).*", parsedURL):
+            return False
 
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
@@ -88,8 +89,8 @@ def is_valid(url):
             + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
             + r"|epub|dll|cnf|tgz|sha1"
             + r"|thmx|mso|arff|rtf|jar|csv"
-            + r"|rm|smil|wmv|swf|wma|zip|rar|gz).*", url)
+            + r"|rm|smil|wmv|swf|wma|zip|rar|gz).*", parsedURL)
 
     except TypeError:
-        print ("TypeError for ", parsed)
+        print("TypeError for ", parsedURL)
         raise
