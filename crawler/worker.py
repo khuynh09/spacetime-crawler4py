@@ -7,6 +7,8 @@ import time
 from bs4 import BeautifulSoup
 from utils import tokenizer
 import re
+from urllib.parse import urlparse
+from urllib.parse import urldefrag
 
 # .ics.uci.edu
 # 
@@ -65,7 +67,7 @@ class Worker(Thread):
 
         if len(token_list) > self.longest_page[1]:
             self.longest_page = [url, len(token_list)]
-        
+        return token_list
 
         
 
@@ -86,7 +88,7 @@ class Worker(Thread):
             #http://www.stat.uci.edu/ 
             if 200 <= resp.status < 300 and resp.raw_response:
                 soup  = BeautifulSoup(resp.raw_response.content, features="lxml")
-                netloc = parse(tbd_url).netloc
+                netloc = urlparse(tbd_url).netloc
                 
                 if "ics.uci.edu" in netloc:
 
@@ -96,8 +98,12 @@ class Worker(Thread):
                         self.subdomains[netloc] += 1
                 
 
+                #filtering out "low quality" content
+                token_list = self.tokenize(tbd_url, soup.get_text(separator=" "))
+                #less than 300 words
+                if(len(token_list) <=  300):
+                    continue
 
-                self.tokenize(tbd_url, soup.get_text(separator=" "))
                 self.logger.info(
                     f"Downloaded {tbd_url}, status <{resp.status}>, "
                     f"using cache {self.config.cache_server}.")
@@ -121,8 +127,9 @@ class Worker(Thread):
         top50 = []
         i = 0
         while len(top50) < 50:
-            if sortedWords[i] not in self.stop_words:
+            if sortedWords[i][0] not in self.stop_words:
                 top50.append(sortedWords[i])
+            i += 1
         print(len(self.saved_urls)) #unique pages
         print(top50) #50 most common words
         print(self.longest_page[0]) ## longest page in terms of words

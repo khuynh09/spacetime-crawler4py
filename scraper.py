@@ -75,9 +75,10 @@ def is_valid(url):
 
         correct_ics_url = parsedURL.scheme + parsedURL.netloc + parsedURL.path
         is_ics_url = any(
-            ics_url in correct_ics_url for ics_url in ics_urls)
+             ics_url in defragged_url for ics_url in ics_urls)
 
         if not is_ics_url:
+            print(defragged_url + "\n")
             return False
 
         if re.match(
