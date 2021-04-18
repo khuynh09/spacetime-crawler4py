@@ -81,7 +81,7 @@ def is_valid(url):
             return False
 
         if re.match(
-                r".*(\/events?\/|responds?|reply|replies|comments?|calenders?|\/css\/|\/js\/|\/pdf\/|\/gif\/|\/jpe?g\/|\/ico\/).*", url):
+                r".*(\/events?\/|responds?|reply|replies|comments?|calendars?|\/css\/|\/js\/|\/pdf\/|\/gif\/|\/jpe?g\/|\/ico\/).*", url):
             return False
 
         return not re.match(
