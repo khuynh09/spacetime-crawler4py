@@ -19,7 +19,7 @@ class Worker(Thread):
         self.frontier = frontier
         self.saved_urls = []
         self.word_freq = {}
-        self.longest_page = [] # [page url, wordCount]
+        self.longest_page = ["", 0] # [page url, wordCount]
         self.subdomains = {}
         self.stop_words = ["a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "aren't",
                 "as", "at", "be", "because", "been",
@@ -45,7 +45,7 @@ class Worker(Thread):
         super().__init__(daemon=True)
 
 
-    def tokenize(self, content):
+    def tokenize(self, url, content):
         token_list = []
         for line in content.split():
             tokens = re.sub(r'[^\w\s]|_', '', line).rstrip(
@@ -62,6 +62,11 @@ class Worker(Thread):
                 self.word_freq[token] += 1
             else:
                 self.word_freq[token] = 1
+
+        if len(token_list) > self.longest_page[1]:
+            self.longest_page = [url, len(token_list)]
+        
+
         
 
 
@@ -75,9 +80,24 @@ class Worker(Thread):
                 break
             resp = download(tbd_url, self.config, self.logger)
 
+
+            #netloc :  www.stat.uci.edu
+            #https://www.stat.uci.edu/
+            #http://www.stat.uci.edu/ 
             if 200 <= resp.status < 300 and resp.raw_response:
                 soup  = BeautifulSoup(resp.raw_response.content, features="lxml")
-                self.tokenize(soup.get_text(separator=" "))
+                netloc = parse(tbd_url).netloc
+                
+                if "ics.uci.edu" in netloc:
+
+                    if netloc not in self.subdomains:
+                        self.subdomains[netloc] = 1
+                    else:
+                        self.subdomains[netloc] += 1
+                
+
+
+                self.tokenize(tbd_url, soup.get_text(separator=" "))
                 self.logger.info(
                     f"Downloaded {tbd_url}, status <{resp.status}>, "
                     f"using cache {self.config.cache_server}.")
@@ -103,6 +123,11 @@ class Worker(Thread):
         while len(top50) < 50:
             if sortedWords[i] not in self.stop_words:
                 top50.append(sortedWords[i])
-        print(top50)
+        print(len(self.saved_urls)) #unique pages
+        print(top50) #50 most common words
+        print(self.longest_page[0]) ## longest page in terms of words
+
+        for k,v in sorted(self.subdomains.items()): ## number of self domains
+            print("{}, {}".format(k,v))
 
         

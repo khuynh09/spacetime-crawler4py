@@ -75,13 +75,13 @@ def is_valid(url):
 
         correct_ics_url = parsedURL.scheme + parsedURL.netloc + parsedURL.path
         is_ics_url = any(
-            parsedURL in correct_ics_url for parsedURL in ics_urls)
+            ics_url in correct_ics_url for ics_url in ics_urls)
 
         if not is_ics_url:
             return False
 
         if re.match(
-                r".*(\/events?\/|responds?|reply|replies|comments?|calenders?|\/css\/|\/js\/|\/pdf\/|\/gif\/|\/jpe?g\/|\/ico\/).*", defragged_url):
+                r".*(\/events?\/|responds?|reply|replies|comments?|calenders?|\/css\/|\/js\/|\/pdf\/|\/gif\/|\/jpe?g\/|\/ico\/).*", url):
             return False
 
         return not re.match(
