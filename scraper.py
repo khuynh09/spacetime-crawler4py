@@ -78,11 +78,12 @@ def is_valid(url):
              ics_url in defragged_url for ics_url in ics_urls)
 
         if not is_ics_url:
-            print(defragged_url + "\n")
+            print("NOT ICS: " + defragged_url + "\n")
             return False
 
         if re.match(
                 r".*(\/events?\/|responds?|reply|replies|comments?|calendars?|\/css\/|\/js\/|\/pdf\/|\/gif\/|\/jpe?g\/|\/ico\/).*", url):
+            print("SKIPPED WORDS: " + defragged_url + "\n")
             return False
 
         return not re.match(

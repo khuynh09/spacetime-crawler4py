@@ -23,7 +23,7 @@ class Worker(Thread):
         self.word_freq = {}
         self.longest_page = ["", 0] # [page url, wordCount]
         self.subdomains = {}
-        self.stop_words = ["a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "aren't",
+        self.stop_words = ["", "a", "about", "above", "after", "again", "against", "all", "am", "an", "and", "any", "are", "aren't",
                 "as", "at", "be", "because", "been",
                 "before", "being", "below", "between", "both", "but", "by", "can't", "cannot", "could", "couldn't",
                 "did", "didn't", "do", "does", "doesn't", "doing", "don't", "down", "during", "each", "few", "for",
@@ -90,8 +90,7 @@ class Worker(Thread):
                 soup  = BeautifulSoup(resp.raw_response.content, features="lxml")
                 netloc = urlparse(tbd_url).netloc
                 
-                if "ics.uci.edu" in netloc:
-
+                if ".ics.uci.edu" in netloc:
                     if netloc not in self.subdomains:
                         self.subdomains[netloc] = 1
                     else:
@@ -101,7 +100,8 @@ class Worker(Thread):
                 #filtering out "low quality" content
                 token_list = self.tokenize(tbd_url, soup.get_text(separator=" "))
                 #less than 300 words
-                if(len(token_list) <=  300):
+                if(len(token_list) <= 50):
+                    print("LESS THAN 50: " + tbd_url + "\n")
                     continue
 
                 self.logger.info(
@@ -132,7 +132,7 @@ class Worker(Thread):
             i += 1
         print(len(self.saved_urls)) #unique pages
         print(top50) #50 most common words
-        print(self.longest_page[0]) ## longest page in terms of words
+        print("LONGEST PAGE: "+ self.longest_page[0]) ## longest page in terms of words
 
         for k,v in sorted(self.subdomains.items()): ## number of self domains
             print("{}, {}".format(k,v))
